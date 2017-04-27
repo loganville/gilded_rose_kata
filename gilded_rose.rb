@@ -1,45 +1,62 @@
 def update_quality(items)
   items.each do |item|
-    if item.name != 'Aged Brie' && item.name != 'Backstage passes to a TAFKAL80ETC concert'
-      if item.quality > 0
-        if item.name != 'Sulfuras, Hand of Ragnaros'
-          item.quality -= 1
-        end
-      end
+    if ['Aged Brie', 'Backstage passes to a TAFKAL80ETC concert', 'Sulfuras, Hand of Ragnaros'].include? item.name
+      BaseItem.new(item).update
     else
-      if item.quality < 50
-        item.quality += 1
-        if item.name == 'Backstage passes to a TAFKAL80ETC concert'
-          if item.sell_in < 11
-            if item.quality < 50
-              item.quality += 1
-            end
+      NormalItem.new(item).update
+    end
+  end
+end
+
+class NormalItem
+  def initialize(item)
+    @item = item
+  end
+
+  def update
+    decrement_quality
+    @item.sell_in -= 1
+    decrement_quality if @item.sell_in < 0
+  end
+
+  def decrement_quality
+    @item.quality -= 1 if @item.quality > 0
+  end
+end
+
+class BaseItem
+  def initialize(item)
+    @item = item
+  end
+
+  def update
+
+    if @item.quality < 50
+      @item.quality += 1
+      if @item.name == 'Backstage passes to a TAFKAL80ETC concert'
+        if @item.sell_in < 11
+          if @item.quality < 50
+            @item.quality += 1
           end
-          if item.sell_in < 6
-            if item.quality < 50
-              item.quality += 1
-            end
+        end
+        if @item.sell_in < 6
+          if @item.quality < 50
+            @item.quality += 1
           end
         end
       end
     end
-    if item.name != 'Sulfuras, Hand of Ragnaros'
-      item.sell_in -= 1
+    if @item.name != 'Sulfuras, Hand of Ragnaros'
+      @item.sell_in -= 1
     end
-    if item.sell_in < 0
-      if item.name != 'Aged Brie'
-        if item.name != 'Backstage passes to a TAFKAL80ETC concert'
-          if item.quality > 0
-            if item.name != 'Sulfuras, Hand of Ragnaros'
-              item.quality -= 1
-            end
-          end
-        else
-          item.quality = item.quality - item.quality
+    if @item.sell_in < 0
+      if @item.name != 'Aged Brie'
+        if @item.name == 'Backstage passes to a TAFKAL80ETC concert'
+          @item.quality = @item.quality - @item.quality
         end
       else
-        if item.quality < 50
-          item.quality += 1
+        if @item.quality < 50
+          @item.quality += 1
         end
       end
     end
